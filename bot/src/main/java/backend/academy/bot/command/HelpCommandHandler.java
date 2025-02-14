@@ -1,7 +1,9 @@
 package backend.academy.bot.command;
 
 import backend.academy.bot.service.TelegramClient;
+import backend.academy.bot.state.StateMachine;
 import org.springframework.stereotype.Component;
+import java.util.logging.Logger;
 
 @Component
 public class HelpCommandHandler implements CommandHandler {

@@ -5,6 +5,7 @@ import backend.academy.bot.service.ScrapperClient;
 import backend.academy.bot.service.TelegramClient;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
+import java.util.logging.Logger;
 
 @Component
 public class ListCommandHandler implements CommandHandler {

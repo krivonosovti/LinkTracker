@@ -7,11 +7,11 @@ import backend.academy.bot.service.ScrapperClient;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import net.logstash.logback.argument.StructuredArguments;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -23,7 +23,7 @@ public class StateMachine {
     private final Map<Long, Conversation> conversations = new ConcurrentHashMap<>();
     private final TelegramClient telegramClient;
     private final ScrapperClient scrapperClient;
-    private final Logger logger = Logger.getLogger(StateMachine.class.getName());
+    private static final Logger logger = LoggerFactory.getLogger(StateMachine.class);
     private final Map<String, CommandHandler> commandHandlers = new HashMap<>();
 
     public StateMachine(TelegramClient telegramClient, ScrapperClient scrapperClient, List<CommandHandler> handlers) {
@@ -85,8 +85,7 @@ public class StateMachine {
             default:
                 telegramClient.sendMessage(chatId, "Неверное состояние. Введите /help для получения списка команд.");
                 conv.reset();
-                logger.log(Level.SEVERE, "Недопустимое состояние машины состояний" );
-                break;
+                logger.error("Недопустимое состояние", StructuredArguments.keyValue("chatId", chatId));
         }
     }
 
@@ -110,7 +109,8 @@ public class StateMachine {
             conv.reset();
         } else {
             telegramClient.sendMessage(chatId, "Неизвестная команда. Введите /help для списка команд.");
-            logger.log(Level.WARNING, "Неизвестная команда: " + messageText + " от " + chatId);
+            logger.warn("Неизвестная команда: ", StructuredArguments.keyValue("message", messageText),
+                StructuredArguments.keyValue("chatId", chatId));
         }
     }
 
@@ -133,7 +133,7 @@ public class StateMachine {
 
     // Новый метод: точка входа для уведомлений от Scrapper-сервиса
     public void notifyUser(Long chatId, String notificationMessage) {
-        logger.log(Level.INFO, "Уведомление для chatId " + chatId + ": " + notificationMessage);
+        logger.info("Notify user: ", StructuredArguments.keyValue("chatId", chatId), StructuredArguments.keyValue("notificationMessage", notificationMessage));
         telegramClient.sendMessage(chatId, "Уведомление: " + notificationMessage);
     }
 }

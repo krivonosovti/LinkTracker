@@ -11,8 +11,12 @@ public class LinkResponse {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
         LinkResponse response = (LinkResponse) o;
         return Objects.equals(id, response.id) && Objects.equals(url, response.url);
     }
@@ -46,24 +50,31 @@ public class LinkResponse {
     public Long getId() {
         return id;
     }
+
     public void setId(Long id) {
         this.id = id;
     }
+
     public String getUrl() {
         return url;
     }
+
     public void setUrl(String url) {
         this.url = url;
     }
+
     public List<String> getTags() {
         return tags;
     }
+
     public void setTags(List<String> tags) {
         this.tags = tags;
     }
+
     public List<String> getFilters() {
         return filters;
     }
+
     public void setFilters(List<String> filters) {
         this.filters = filters;
     }

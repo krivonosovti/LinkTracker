@@ -1,6 +1,5 @@
 package backend.academy.scrapper;
 
-import jakarta.validation.constraints.NotEmpty;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.validation.annotation.Validated;
 
@@ -10,5 +9,5 @@ import org.springframework.validation.annotation.Validated;
 //    public record StackOverflowCredentials(@NotEmpty String key, @NotEmpty String accessToken) {}
 //}
 public record ScrapperConfig(String githubToken, StackOverflowCredentials stackOverflow) {
-    public record StackOverflowCredentials( String key,  String accessToken) {}
+    public record StackOverflowCredentials(String key,  String accessToken) {}
 }

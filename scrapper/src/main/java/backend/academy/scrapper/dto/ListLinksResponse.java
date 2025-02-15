@@ -10,15 +10,19 @@ public class ListLinksResponse {
         this.links = links;
         this.size = size;
     }
+
     public List<LinkResponse> getLinks() {
         return links;
     }
+
     public void setLinks(List<LinkResponse> links) {
         this.links = links;
     }
+
     public int getSize() {
         return size;
     }
+
     public void setSize(int size) {
         this.size = size;
     }

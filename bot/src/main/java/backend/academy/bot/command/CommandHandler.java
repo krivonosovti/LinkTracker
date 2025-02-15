@@ -1,4 +1,5 @@
 package backend.academy.bot.command;
+
 public interface CommandHandler {
     /**
      * Возвращает команду, которую обрабатывает данный обработчик (например, "/start")

@@ -1,9 +1,5 @@
 package backend.academy.bot.dto;
 
-import lombok.Getter;
-import lombok.Setter;
-import java.util.UUID;
-
 public class TelegramChat {
     private Long id;
 

@@ -2,7 +2,8 @@ package backend.academy.bot.command;
 
 import backend.academy.bot.service.TelegramClient;
 
-public class UpdatesCommandHandler implements CommandHandler{
+public class UpdatesCommandHandler implements CommandHandler {
+
     private final TelegramClient telegramClient;
 
     public UpdatesCommandHandler(TelegramClient telegramClient) {
@@ -15,12 +16,12 @@ public class UpdatesCommandHandler implements CommandHandler{
     }
 
     @Override
-    public void handle(Long chatId, String messageText) {  // тут нужно прериписать с выводом обновления 
-        String helpMessage = "Доступные команды:\n" +
-            "/help - список команд\n" +
-            "/track - начать отслеживание ссылки\n" +
-            "/untrack - прекратить отслеживание ссылки\n" +
-            "/list - показать список отслеживаемых ссылок";
+    public void handle(Long chatId, String messageText) {  // тут нужно прериписать с выводом обновления
+        String helpMessage = "Доступные команды:\n"
+            + "/help - список команд\n"
+            + "/track - начать отслеживание ссылки\n"
+            + "/untrack - прекратить отслеживание ссылки\n"
+            + "/list - показать список отслеживаемых ссылок";
         telegramClient.sendMessage(chatId, helpMessage);
     }
 }

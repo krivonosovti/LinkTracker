@@ -1,7 +1,5 @@
 package backend.academy.bot.dto;
 
-import lombok.Getter;
-import lombok.Setter;
 public class TelegramMessage {
     private Long massageID;
     private TelegramChat chat;

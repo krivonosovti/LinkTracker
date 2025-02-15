@@ -1,9 +1,9 @@
 package backend.academy.bot.service;
 
 import backend.academy.bot.BotConfig;
-import backend.academy.bot.state.StateMachine;
 import backend.academy.bot.dto.TelegramResponse;
 import backend.academy.bot.dto.TelegramUpdate;
+import backend.academy.bot.state.StateMachine;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -43,7 +43,7 @@ public class TelegramPollingService {
                     lastUpdateId = update.getUpdateId();
                 }
                 // Если сообщение не пустое, передаём его на обработку
-                if (update.getMessage() != null && update.getMessage().getText()!= null) {
+                if (update.getMessage() != null && update.getMessage().getText() != null) {
                     Long chatId = update.getMessage().getChat().getId();
                     String text = update.getMessage().getText();
                     stateMachine.start(chatId, text);

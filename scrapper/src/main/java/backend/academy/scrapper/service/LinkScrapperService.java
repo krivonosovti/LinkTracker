@@ -15,6 +15,7 @@ public class LinkScrapperService {
     private final ChangeApiClient changeApiClient;
     private final BotApiClient botApiClient;
     Logger logger = Logger.getLogger(LinkScrapperService.class.getName());
+
     public LinkScrapperService(InMemoryLinkRepository repository,
                                ChangeApiClient changeApiClient,
                                BotApiClient botApiClient) {
@@ -23,7 +24,7 @@ public class LinkScrapperService {
         this.botApiClient = botApiClient;
     }
 
-    // Проверяем обновления каждые 5 минут (300000 мс)
+    // Проверяем обновления каждые 5 минут (30000 мс)
     @Scheduled(fixedDelayString = "${scrapper.check-delay-ms:60000}")
     public void checkForUpdates() {
         repository.getAllLinks().forEach(linkEntry -> {

@@ -15,7 +15,7 @@ public class BotApiClient {
         this.webClient = webClientBuilder.baseUrl(baseUrl).build();
     }
 
-    public Mono<Void> sendUpdate(LinkUpdate update) {
+    public Mono<?> sendUpdate(LinkUpdate update) {   // продумать как обратботать ответ apiError
         return webClient.post()
             .uri("/updates")
             .bodyValue(update)

@@ -1,15 +1,16 @@
-package backend.academy.bot.dto;
+package backend.academy.bot;
 
+import java.io.Serializable;
 import java.util.List;
 
-public class ApiErrorResponse {
-    private String description;
-    private String code;
-    private String exceptionName;
-    private String exceptionMessage;
-    private List<String> stacktrace;
+public class ApiError extends RuntimeException {
+    private final String description;
+    private final String code;
+    private final String exceptionName;
+    private final String exceptionMessage;
+    private final List<String> stacktrace;
 
-    public ApiErrorResponse(String description, String code, String exceptionName,
+    public ApiError(String description, String code, String exceptionName,
                             String exceptionMessage, List<String> stacktrace) {
         this.description = description;
         this.code = code;
@@ -34,7 +35,7 @@ public class ApiErrorResponse {
         return exceptionMessage;
     }
 
-    public List<String> getStackTrace() {
+    public List<String> getStacktrace() {
         return stacktrace;
     }
 }

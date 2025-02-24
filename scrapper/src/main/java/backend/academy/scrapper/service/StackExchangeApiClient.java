@@ -17,8 +17,6 @@ import reactor.core.publisher.Mono;
 public class StackExchangeApiClient implements ChangeApiClient {
 
     private final WebClient webClient;
-    // Регулярное выражение для извлечения идентификатора вопроса из URL,
-    // например, из пути "/questions/292357/..."
     private static final Pattern QUESTION_PATTERN = Pattern.compile("/questions/(\\d+)");
 
     public StackExchangeApiClient(WebClient.Builder webClientBuilder,

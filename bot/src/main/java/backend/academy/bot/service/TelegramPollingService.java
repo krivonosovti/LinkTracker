@@ -10,8 +10,6 @@ import org.springframework.web.reactive.function.client.WebClient;
 
 @Service
 public class TelegramPollingService {
-
-//    private static final String API_PREFIX = "https://api.telegram.org";
     private final BotConfig botConfig;
     private final WebClient webClient;
     private final StateMachine stateMachine;

@@ -1,5 +1,6 @@
 package backend.academy.scrapper.dto;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class ApiErrorResponse {
@@ -10,6 +11,14 @@ public class ApiErrorResponse {
     private List<String> stacktrace;
 
     public ApiErrorResponse() {
+    }
+
+    public ApiErrorResponse(String description, String code, String exceptionName, String exceptionMessage, List<String> stacktrace) {
+        this.description = description;
+        this.code = code;
+        this.exceptionName = exceptionName;
+        this.exceptionMessage = exceptionMessage;
+        this.stacktrace = stacktrace;
     }
 
     public String getDescription() {

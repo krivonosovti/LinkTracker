@@ -1,5 +1,7 @@
 package backend.academy.bot.command;
 
+import backend.academy.bot.ApiError;
+import backend.academy.bot.dto.LinkResponse;
 import backend.academy.bot.service.ScrapperClient;
 import backend.academy.bot.service.TelegramClient;
 import org.springframework.stereotype.Component;
@@ -30,12 +32,21 @@ public class UntrackCommandHandler implements CommandHandler {
             return;
         }
         String link = parts[1];
-        Mono<Void> result = scrapperClient.removeLink(chatId, link)
-            .doOnNext(linkResponse ->
-                telegramClient.sendMessage(chatId, "Ссылка успешно удалена: " + linkResponse.getUrl()))
-            .doOnError(error ->
-                telegramClient.sendMessage(chatId, "Ошибка при удалении ссылки: " + error.getMessage()))
-            .then();
-        result.subscribe();
+        Mono<LinkResponse> result = scrapperClient.removeLink(chatId, link);
+        result.subscribe(
+            response -> telegramClient.sendMessage(chatId, "Ссылка успешно удалена: " + response.getUrl()),
+            error -> sendErrorInfo(chatId, error, "Ошибка удаления ссылки")
+            );
+    }
+
+    private void sendErrorInfo(Long chatId, Throwable error, String msg) {
+        if (error instanceof ApiError) {
+            // Если ошибка является экземпляром ApiError, выводим описание
+            ApiError apiError = (ApiError) error;
+            telegramClient.sendMessage(chatId, msg + ":\n " + apiError.getDescription());
+        } else {
+            // В случае других ошибок выводим стандартное сообщение
+            telegramClient.sendMessage(chatId, msg + ":\n " + error.getMessage());
+        }
     }
 }

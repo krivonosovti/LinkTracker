@@ -49,4 +49,8 @@ public class LinkUpdate {
     public void setTgChatIds(List<Long> tgChatIds) {
         this.tgChatIds = tgChatIds;
     }
+
+    public boolean isEmpty() {
+        return id == null || url == null || description == null || tgChatIds == null;
+    }
 }

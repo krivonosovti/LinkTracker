@@ -1,11 +1,13 @@
 package backend.academy.scrapper.controller;
 
 import backend.academy.scrapper.dto.AddLinkRequest;
+import backend.academy.scrapper.dto.ApiErrorResponse;
 import backend.academy.scrapper.dto.LinkResponse;
 import backend.academy.scrapper.dto.ListLinksResponse;
 import backend.academy.scrapper.dto.RemoveLinkRequest;
 import backend.academy.scrapper.model.LinkEntry;
 import backend.academy.scrapper.repository.InMemoryLinkRepository;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -25,6 +27,16 @@ public class LinkController {
 
     private final InMemoryLinkRepository repository;
 
+    private static final String BAD_REQUEST_DESCRIPTION = "Некорректные параметры запроса";
+    private static final String BAD_REQUEST_CODE = "400";
+    private static final String BAD_REQUEST_EXCEPTION = "IllegalArgumentException";
+    private static final String BAD_REQUEST_MESSAGE = "Chat ID не должен быть null";
+
+    private static final String NOT_FOUND_DESCRIPTION = "Ссылка не найдена";
+    private static final String NOT_FOUND_CODE = "404";
+    private static final String NOT_FOUND_EXCEPTION = "NotFoundException";
+    private static final String NOT_FOUND_MESSAGE = "Запрашиваемый ресурс не найден";
+
     public LinkController(InMemoryLinkRepository repository) {
         this.repository = repository;
     }
@@ -35,15 +47,24 @@ public class LinkController {
      * Возвращает объект LinkResponse.
      */
     @PostMapping
-    public ResponseEntity<LinkResponse> addLink(
+    public ResponseEntity<?> addLink(
         @RequestHeader("Tg-Chat-Id") Long chatId,
         @RequestBody AddLinkRequest request
     ) {
-        // Добавляем или обновляем ссылку в репозитории
-        LinkEntry entry = repository.addOrUpdateLink(request.getLink(), request.getTags(),
-            request.getFilters(), chatId);
-        LinkResponse response = toLinkResponse(entry);
-        return ResponseEntity.ok(response);
+        if (chatId == null) {
+            return ResponseEntity.badRequest().body(
+                createBadRequestError("Неуказан идентификатор чата", new ArrayList<>()));
+        }
+        try {
+            LinkEntry entry = repository.addOrUpdateLink(request.getLink(), request.getTags(),
+                request.getFilters(), chatId);
+            LinkResponse response = toLinkResponse(entry);
+            return ResponseEntity.ok(response);
+        }
+        catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(
+                createBadRequestError("Ссылка неактивна", new ArrayList<>()));
+        }
     }
 
     /**
@@ -52,15 +73,21 @@ public class LinkController {
      * Возвращает объект ListLinksResponse.
      */
     @GetMapping
-    public ResponseEntity<ListLinksResponse> getLinks(@RequestHeader("Tg-Chat-Id") Long chatId) {
-        Collection<LinkEntry> allEntries = repository.getAllLinks();
-        // Фильтруем записи, оставляя только те, где присутствует данный chatId
-        List<LinkResponse> responses = allEntries.stream()
-            .filter(entry -> entry.getTgChatIds().contains(chatId))
-            .map(this::toLinkResponse)
-            .collect(Collectors.toList());
-        ListLinksResponse response = new ListLinksResponse(responses, responses.size());
-        return ResponseEntity.ok(response);
+    public ResponseEntity<?> getLinks(@RequestHeader("Tg-Chat-Id") Long chatId) {
+        try {
+            Collection<LinkEntry> allEntries = repository.getAllLinks();
+            // Фильтруем записи, оставляя только те, где присутствует данный chatId
+            List<LinkResponse> responses = allEntries.stream()
+                .filter(entry -> entry.getTgChatIds().contains(chatId))
+                .map(this::toLinkResponse)
+                .collect(Collectors.toList());
+            ListLinksResponse response = new ListLinksResponse(responses, responses.size());
+            return ResponseEntity.ok(response);
+        }
+        catch (Exception e) {
+            return ResponseEntity.badRequest().body(
+                createBadRequestError(BAD_REQUEST_DESCRIPTION, new ArrayList<>()));
+        }
     }
 
     /**
@@ -69,22 +96,38 @@ public class LinkController {
      * Возвращает объект LinkResponse.
      */
     @DeleteMapping
-    public ResponseEntity<LinkResponse> removeLink(
+    public ResponseEntity<?> removeLink(
         @RequestHeader("Tg-Chat-Id") Long chatId,
         @RequestBody RemoveLinkRequest request
     ) {
-        // Убираем chatId из списка отслеживающих для ссылки
-        LinkEntry entry = repository.removeChatFromLink(request.getLink(), chatId);
-        // Если запись найдена, возвращаем актуальное состояние, иначе формируем DTO с минимальными данными
-        LinkResponse response = (entry != null) ? toLinkResponse(entry)
-            : new LinkResponse(null, request.getLink(), null, null);
-        return ResponseEntity.ok(response);
+        if (chatId == null) {
+            return ResponseEntity.badRequest().body(
+                createBadRequestError(BAD_REQUEST_DESCRIPTION, new ArrayList<>()));
+        }
+        try {
+            LinkEntry entry = repository.removeChatFromLink(request.getLink(), chatId);
+            if (entry == null)
+                return ResponseEntity.badRequest().body(
+                    createNotFoundError(NOT_FOUND_DESCRIPTION, new ArrayList<>()));
+           return ResponseEntity.ok(toLinkResponse(entry));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(
+                createBadRequestError(BAD_REQUEST_DESCRIPTION, new ArrayList<>()));
+        }
     }
 
-    /**
-     * Преобразует внутреннюю модель LinkEntry в DTO LinkResponse.
-     */
+
     private LinkResponse toLinkResponse(LinkEntry entry) {
         return new LinkResponse(entry.getId(), entry.getUrl(), entry.getTags(), entry.getFilters());
+    }
+
+    private ApiErrorResponse createBadRequestError(String description, List<String> stacktrace) {
+        return new ApiErrorResponse(description, BAD_REQUEST_CODE, BAD_REQUEST_EXCEPTION,
+            BAD_REQUEST_MESSAGE, stacktrace);
+    }
+
+    private ApiErrorResponse createNotFoundError(String description, List<String> stacktrace) {
+        return new ApiErrorResponse(description, NOT_FOUND_CODE, NOT_FOUND_EXCEPTION,
+            NOT_FOUND_MESSAGE, stacktrace);
     }
 }

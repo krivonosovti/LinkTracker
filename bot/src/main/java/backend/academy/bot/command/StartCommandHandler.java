@@ -1,5 +1,6 @@
 package backend.academy.bot.command;
 
+import backend.academy.bot.ApiError;
 import backend.academy.bot.service.ScrapperClient;
 import backend.academy.bot.service.TelegramClient;
 import org.springframework.stereotype.Component;
@@ -26,7 +27,13 @@ public class StartCommandHandler implements CommandHandler {
         // Регистрируем чат в Scrapper-сервисе
         Mono<Void> result = scrapperClient.registerChat(chatId)
             .doOnSuccess(unused -> telegramClient.sendMessage(chatId, getWelcomeMessage()))
-            .doOnError(error -> telegramClient.sendMessage(chatId, "Ошибка регистрации: " + error.getMessage()))
+            .doOnError(error ->  {
+                if (error instanceof ApiError) {
+                    telegramClient.sendMessage(chatId, "Ошибка регистрации: " + ((ApiError) error).getDescription());
+                } else {
+                    telegramClient.sendMessage(chatId, "Ошибка регистрации: " + error.getMessage());
+                }
+            })
             .then();
         result.subscribe();
     }
@@ -42,5 +49,16 @@ public class StartCommandHandler implements CommandHandler {
 
                 🔍 Просто отправь команду, и я начну следить за изменениями!
                 """;
+    }
+
+    private void sendErrorInfo(Long chatId, Throwable error, String msg) {
+        if (error instanceof ApiError) {
+            // Если ошибка является экземпляром ApiError, выводим описание
+            ApiError apiError = (ApiError) error;
+            telegramClient.sendMessage(chatId, msg + ":\n " + apiError.getDescription());
+        } else {
+            // В случае других ошибок выводим стандартное сообщение
+            telegramClient.sendMessage(chatId, msg + ":\n " + error.getMessage());
+        }
     }
 }

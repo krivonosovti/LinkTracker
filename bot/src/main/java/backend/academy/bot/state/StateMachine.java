@@ -1,5 +1,6 @@
 package backend.academy.bot.state;
 
+import backend.academy.bot.ApiError;
 import backend.academy.bot.command.CommandHandler;
 import backend.academy.bot.dto.LinkResponse;
 import backend.academy.bot.dto.LinkUpdate;
@@ -98,7 +99,7 @@ public class StateMachine {
     private void startScript(Long chatId, String messageText, Conversation conv) {
         if (messageText.trim().equalsIgnoreCase("/start")) {
             conv.setState(State.COMMAND_WAITING);
-            telegramClient.sendMessage(chatId, "Бот активирован! Введите /help для списка команд.");
+            commandHandlers.get("/start").handle(chatId, messageText);
         } else {
             telegramClient.sendMessage(chatId, "Введите /start для начала работы с ботом.");
         }
@@ -129,9 +130,20 @@ public class StateMachine {
         Mono<LinkResponse> result = scrapperClient.addLink(chatId, link, tags, filters);
         result.subscribe(
             response -> telegramClient.sendMessage(chatId, "Ссылка успешно добавлена: " + response.getUrl()),
-            error -> telegramClient.sendMessage(chatId, "Ошибка при добавлении ссылки: " + error.getMessage())
+            error -> sendErrorInfo(chatId, error)
         );
         conv.reset();
+    }
+
+    private void sendErrorInfo(Long chatId, Throwable error) {
+        if (error instanceof ApiError) {
+            // Если ошибка является экземпляром ApiError, выводим описание
+            ApiError apiError = (ApiError) error;
+            telegramClient.sendMessage(chatId, "Ошибка при добавлении ссылки: " + apiError.getDescription());
+        } else {
+            // В случае других ошибок выводим стандартное сообщение
+            telegramClient.sendMessage(chatId, "Ошибка при добавлении ссылки: " + error.getMessage());
+        }
     }
 
     private List<String> parseInput(String input) {

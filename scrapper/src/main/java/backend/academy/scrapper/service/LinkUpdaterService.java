@@ -52,8 +52,8 @@ public class LinkUpdaterService {
 
     @Transactional
     public void updateLinks() {
-        linkService.getLinksToUpdate(linkAgeInMinutes, batchSize)
-            .forEach(this::processLinkUpdate);
+        List<Link> updates = linkService.getLinksToUpdate(linkAgeInMinutes, batchSize);
+        updates.forEach(this::processLinkUpdate);
     }
 
     private void processLinkUpdate(Link link) {
@@ -67,20 +67,21 @@ public class LinkUpdaterService {
         try {
             handler.get().getLinkUpdate(link)
                 .ifPresentOrElse(
-                    it -> notifyBot(link, it, checkedAt),
+                    it ->
+                        notifyBot(link, it, checkedAt),
                     () -> linkService.updateCheckedAt(link, checkedAt)
                 );
         } catch (RuntimeException ex) {
             handleClientExceptionOnLinkUpdate(ex, link);
         }
     }
-
+    // TUUUT
     private Optional<LinkUpdateHandler> getLinkUpdateHandler(Link link, ScrapperConfig.LinkSource linkSource) {
         return linkSource.handlers().values().stream()
-            .filter(it -> Pattern.matches("https://" + linkSource.domain() + it.regex(), link.url()))
-            .map(ScrapperConfig.LinkSourceHandler::handler)
-            .map(linkUpdateHandlers::get)
-            .findFirst();
+                .filter(it -> Pattern.matches("https://" + linkSource.domain() + it.regex(), link.url()))
+                .map(ScrapperConfig.LinkSourceHandler::handler)
+                .map(linkUpdateHandlers::get)
+                .findFirst();
     }
 
     private void notifyBot(Link link, String message, OffsetDateTime checkedAt) {

@@ -58,7 +58,8 @@ public class InMemoryLinkRepository implements LinkRepository {
     public List<Link> findAllWithStatusAndOlderThan(LinkStatus status, OffsetDateTime checkedAt, Pageable pageable) {
         List<Link> result = new ArrayList<>();
         for (Link link : linkStorage.values()) {
-            if (link.status() == status && link.checkedAt().isBefore(checkedAt)) {
+//            if (link.status() == status && link.checkedAt().isBefore(checkedAt)) {
+            if (link.status() == status) {
                 result.add(link);
             }
         }

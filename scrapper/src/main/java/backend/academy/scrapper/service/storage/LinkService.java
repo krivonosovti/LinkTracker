@@ -28,11 +28,12 @@ public class LinkService implements backend.academy.scrapper.service.LinkService
 
     @Override
     public List<Link> getLinksToUpdate(Integer minutes, Integer limit) {
-        return linkRepository.findAllWithStatusAndOlderThan(
+        List<Link> links = linkRepository.findAllWithStatusAndOlderThan(
             LinkStatus.ACTIVE,
             OffsetDateTime.now().minusMinutes(minutes),
             PageRequest.of(0, limit)
         );
+        return links;
     }
 
     @Transactional

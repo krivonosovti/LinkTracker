@@ -1,17 +1,22 @@
 package backend.academy.scrapper.controller;
 
-import backend.academy.scrapper.dto.AddLinkRequest;
-import backend.academy.scrapper.dto.ApiErrorResponse;
-import backend.academy.scrapper.dto.LinkResponse;
-import backend.academy.scrapper.dto.ListLinksResponse;
-import backend.academy.scrapper.dto.RemoveLinkRequest;
-import backend.academy.scrapper.model.LinkEntry;
-import backend.academy.scrapper.repository.InMemoryLinkRepository;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.stream.Collectors;
-import org.springframework.http.ResponseEntity;
+import backend.academy.scrapper.dto.request.AddLinkRequest;
+import backend.academy.scrapper.dto.request.RemoveLinkRequest;
+import backend.academy.scrapper.dto.response.LinkResponse;
+import backend.academy.scrapper.dto.response.ListLinksResponse;
+import backend.academy.scrapper.exception.ApiErrorResponse;
+import backend.academy.scrapper.service.LinkService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
+import lombok.RequiredArgsConstructor;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -20,114 +25,62 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-
+@Tag(name = "link")
+@RequiredArgsConstructor
+@Validated
 @RestController
 @RequestMapping("/links")
 public class LinkController {
 
-    private final InMemoryLinkRepository repository;
+    private final LinkService linkService;
 
-    private static final String BAD_REQUEST_DESCRIPTION = "Некорректные параметры запроса";
-    private static final String BAD_REQUEST_CODE = "400";
-    private static final String BAD_REQUEST_EXCEPTION = "IllegalArgumentException";
-    private static final String BAD_REQUEST_MESSAGE = "Chat ID не должен быть null";
-
-    private static final String NOT_FOUND_DESCRIPTION = "Ссылка не найдена";
-    private static final String NOT_FOUND_CODE = "404";
-    private static final String NOT_FOUND_EXCEPTION = "NotFoundException";
-    private static final String NOT_FOUND_MESSAGE = "Запрашиваемый ресурс не найден";
-
-    public LinkController(InMemoryLinkRepository repository) {
-        this.repository = repository;
-    }
-
-    /**
-     * Добавляет отслеживаемую ссылку.
-     * Принимает заголовок "Tg-Chat-Id" и тело запроса типа AddLinkRequest.
-     * Возвращает объект LinkResponse.
-     */
-    @PostMapping
-    public ResponseEntity<?> addLink(
-        @RequestHeader("Tg-Chat-Id") Long chatId,
-        @RequestBody AddLinkRequest request
-    ) {
-        if (chatId == null) {
-            return ResponseEntity.badRequest().body(
-                createBadRequestError("Неуказан идентификатор чата", new ArrayList<>()));
-        }
-        try {
-            LinkEntry entry = repository.addOrUpdateLink(request.getLink(), request.getTags(),
-                request.getFilters(), chatId);
-            LinkResponse response = toLinkResponse(entry);
-            return ResponseEntity.ok(response);
-        }
-        catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(
-                createBadRequestError("Ссылка неактивна", new ArrayList<>()));
-        }
-    }
-
-    /**
-     * Получает список отслеживаемых ссылок для указанного чата.
-     * Принимает заголовок "Tg-Chat-Id".
-     * Возвращает объект ListLinksResponse.
-     */
+    @Operation(summary = "get all tracked links")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "links are received",
+            content = @Content(schema = @Schema(implementation = ListLinksResponse.class))),
+        @ApiResponse(responseCode = "400", description = "invalid request parameters",
+            content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))),
+        @ApiResponse(responseCode = "404", description = "chat not found",
+            content = @Content(schema = @Schema(implementation = ApiErrorResponse.class)))
+    })
     @GetMapping
-    public ResponseEntity<?> getLinks(@RequestHeader("Tg-Chat-Id") Long chatId) {
-        try {
-            Collection<LinkEntry> allEntries = repository.getAllLinks();
-            // Фильтруем записи, оставляя только те, где присутствует данный chatId
-            List<LinkResponse> responses = allEntries.stream()
-                .filter(entry -> entry.getTgChatIds().contains(chatId))
-                .map(this::toLinkResponse)
-                .collect(Collectors.toList());
-            ListLinksResponse response = new ListLinksResponse(responses, responses.size());
-            return ResponseEntity.ok(response);
-        }
-        catch (Exception e) {
-            return ResponseEntity.badRequest().body(
-                createBadRequestError(BAD_REQUEST_DESCRIPTION, new ArrayList<>()));
-        }
+    public ListLinksResponse getLinks(@RequestHeader("Tg-Chat-Id") @NotNull @Positive Long chatId) {
+        return linkService.getChatLinks(chatId);
     }
 
-    /**
-     * Убирает отслеживание ссылки.
-     * Принимает заголовок "Tg-Chat-Id" и тело запроса типа RemoveLinkRequest.
-     * Возвращает объект LinkResponse.
-     */
-    @DeleteMapping
-    public ResponseEntity<?> removeLink(
-        @RequestHeader("Tg-Chat-Id") Long chatId,
-        @RequestBody RemoveLinkRequest request
+    @Operation(summary = "add a tracking link")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "link is added",
+            content = @Content(schema = @Schema(implementation = LinkResponse.class))),
+        @ApiResponse(responseCode = "400", description = "invalid request parameters",
+            content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))),
+        @ApiResponse(responseCode = "404", description = "chat not found",
+            content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))),
+        @ApiResponse(responseCode = "409", description = "link already added",
+            content = @Content(schema = @Schema(implementation = ApiErrorResponse.class)))
+    })
+    @PostMapping
+    public LinkResponse addLink(
+        @RequestHeader("Tg-Chat-Id") @NotNull @Positive Long chatId,
+        @RequestBody @Valid AddLinkRequest linkRequest
     ) {
-        if (chatId == null) {
-            return ResponseEntity.badRequest().body(
-                createBadRequestError(BAD_REQUEST_DESCRIPTION, new ArrayList<>()));
-        }
-        try {
-            LinkEntry entry = repository.removeChatFromLink(request.getLink(), chatId);
-            if (entry == null)
-                return ResponseEntity.badRequest().body(
-                    createNotFoundError(NOT_FOUND_DESCRIPTION, new ArrayList<>()));
-           return ResponseEntity.ok(toLinkResponse(entry));
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(
-                createBadRequestError(BAD_REQUEST_DESCRIPTION, new ArrayList<>()));
-        }
+        return linkService.addLinkToChat(chatId, linkRequest.link());
     }
 
-
-    private LinkResponse toLinkResponse(LinkEntry entry) {
-        return new LinkResponse(entry.getId(), entry.getUrl(), entry.getTags(), entry.getFilters());
-    }
-
-    private ApiErrorResponse createBadRequestError(String description, List<String> stacktrace) {
-        return new ApiErrorResponse(description, BAD_REQUEST_CODE, BAD_REQUEST_EXCEPTION,
-            BAD_REQUEST_MESSAGE, stacktrace);
-    }
-
-    private ApiErrorResponse createNotFoundError(String description, List<String> stacktrace) {
-        return new ApiErrorResponse(description, NOT_FOUND_CODE, NOT_FOUND_EXCEPTION,
-            NOT_FOUND_MESSAGE, stacktrace);
+    @Operation(summary = "remove a tracked link")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "link is removed",
+            content = @Content(schema = @Schema(implementation = LinkResponse.class))),
+        @ApiResponse(responseCode = "400", description = "invalid request parameters",
+            content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))),
+        @ApiResponse(responseCode = "404", description = "chat or link not found",
+            content = @Content(schema = @Schema(implementation = ApiErrorResponse.class)))
+    })
+    @DeleteMapping
+    public LinkResponse removeLink(
+        @RequestHeader("Tg-Chat-Id") @NotNull @Positive Long chatId,
+        @RequestBody @Valid RemoveLinkRequest linkRequest
+    ) {
+        return linkService.removeLinkFromChat(chatId, linkRequest.link());
     }
 }

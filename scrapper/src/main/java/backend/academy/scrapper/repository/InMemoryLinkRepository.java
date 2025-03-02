@@ -1,71 +1,68 @@
 package backend.academy.scrapper.repository;
 
-import backend.academy.scrapper.model.LinkEntry;
+import backend.academy.scrapper.entity.Chat;
+import backend.academy.scrapper.entity.Link;
+import backend.academy.scrapper.enums.LinkStatus;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
-
-import java.io.IOException;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.Collection;
+import java.time.OffsetDateTime;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicLong;
+import java.util.Optional;
 
 @Repository
-public class InMemoryLinkRepository {
+public class InMemoryLinkRepository implements LinkRepository {
 
-    private final Map<String, LinkEntry> links = new ConcurrentHashMap<>();
-    private final AtomicLong idGenerator = new AtomicLong(1);
+    private final Map<String, Link> linkStorage = new HashMap<>();
+    private final Map<Chat, List<Link>> chatLinksStorage = new HashMap<>();
 
-    public LinkEntry addOrUpdateLink(String url, List<String> tags, List<String> filters, Long tgChatId) throws IllegalArgumentException {
+    @Override
+    public Link save(Link link) {
+        linkStorage.put(link.url(), link);
+        return link;
+    }
 
-        if (!isLinkAlive(url)) {
-            throw new IllegalArgumentException();
+    @Override
+    public List<Link> findAllByChat(Chat chat) {
+        return chatLinksStorage.getOrDefault(chat, new ArrayList<>());
+    }
+
+    @Override
+    public Optional<Link> findByUrl(String url) {
+        return Optional.ofNullable(linkStorage.get(url));
+    }
+
+    @Override
+    public boolean updateStatus(Link link, LinkStatus status) {
+        Link existingLink = linkStorage.get(link.url());
+        if (existingLink != null) {
+            existingLink.status(status);
+            return true;
         }
-        return links.compute(url, (key, existing) -> {
-            if (existing == null) {
-                LinkEntry newEntry = new LinkEntry(idGenerator.getAndIncrement(), url, tags, filters);
-                newEntry.addChat(tgChatId);
-                return newEntry;
-            } else {
-                existing.addChat(tgChatId);
-                return existing;
+        return false;
+    }
+
+    @Override
+    public boolean updateCheckedAt(Link link, OffsetDateTime checkedAt) {
+        Link existingLink = linkStorage.get(link.url());
+        if (existingLink != null) {
+            existingLink.checkedAt(checkedAt);
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public List<Link> findAllWithStatusAndOlderThan(LinkStatus status, OffsetDateTime checkedAt, Pageable pageable) {
+        List<Link> result = new ArrayList<>();
+        for (Link link : linkStorage.values()) {
+            if (link.status() == status && link.checkedAt().isBefore(checkedAt)) {
+                result.add(link);
             }
-        });
-    }
-
-    public LinkEntry removeChatFromLink(String url, Long tgChatId) throws Exception {
-        LinkEntry entry = links.get(url);
-        if (entry != null) {
-            entry.removeChat(tgChatId);
-            if (entry.getTgChatIds().isEmpty()) {
-                links.remove(url);
-            }
         }
-        return entry;
-    }
-
-    public Collection<LinkEntry> getAllLinks() {
-        return links.values();
-    }
-
-    public void updateLink(LinkEntry linkEntry) {
-        links.put(linkEntry.getUrl(), linkEntry);
-    }
-
-    public boolean isLinkAlive(String url) {
-        try {
-            HttpURLConnection connection = (HttpURLConnection) new URL(url).openConnection();
-            connection.setRequestMethod("HEAD"); // Проверяем только заголовки (быстрее, чем GET)
-            connection.setConnectTimeout(5000);
-            connection.setReadTimeout(5000);
-            connection.connect();
-            int responseCode = connection.getResponseCode();
-            return (200 <= responseCode && responseCode < 400); // 2xx и 3xx считаем живыми
-        } catch (IOException e) {
-            return false; // Ошибка сети или недоступен сервер
-        }
+        // Paginate if needed (for simplicity, no pagination logic implemented here)
+        return result;
     }
 }

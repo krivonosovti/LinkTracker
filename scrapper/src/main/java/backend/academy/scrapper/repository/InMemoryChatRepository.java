@@ -1,27 +1,44 @@
 package backend.academy.scrapper.repository;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import backend.academy.scrapper.entity.Chat;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public class InMemoryChatRepository {
-    private final Set<Long> chats = new ConcurrentSkipListSet<>();
-    Logger logger = Logger.getLogger(InMemoryChatRepository.class.getName());
+public class InMemoryChatRepository implements ChatRepository {
 
-    public void registerChat(Long chatId) {
-        if (!chats.add(chatId)) {
-            logger.log(Level.INFO, "This chat id is already registered");
-        }
+    private final Map<Long, Chat> chatStorage = new HashMap<>();
+
+    @Override
+    public Chat save(Chat chat) {
+        chatStorage.put(chat.chatId(), chat);
+        return chat;
     }
 
-    public boolean removeChat(Long chatId) {
-        return chats.remove(chatId);
+    @Override
+    public boolean delete(Long chatId) {
+        return chatStorage.remove(chatId) != null;
     }
 
-    public boolean exists(Long chatId) {
-        return chats.contains(chatId);
+    @Override
+    public Optional<Chat> findByChatId(Long chatId) {
+        return Optional.ofNullable(chatStorage.get(chatId));
+    }
+
+    @Override
+    public boolean existsByChatId(Long chatId) {
+        return chatStorage.containsKey(chatId);
+    }
+
+    @Override
+    public Optional<Chat> findWithLinksByChatId(Long chatId) {
+        Chat chat = chatStorage.get(chatId);
+        return chat != null ? Optional.of(chat) : Optional.empty();
     }
 }

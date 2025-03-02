@@ -1,68 +1,56 @@
 package backend.academy.scrapper.controller;
 
-import backend.academy.scrapper.dto.ApiErrorResponse;
-import backend.academy.scrapper.repository.InMemoryChatRepository;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import backend.academy.scrapper.exception.ApiErrorResponse;
+import backend.academy.scrapper.service.ChatService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.constraints.Positive;
+import lombok.RequiredArgsConstructor;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import java.util.ArrayList;
-import java.util.List;
 
+@Tag(name = "chat")
+@RequiredArgsConstructor
+@Validated
 @RestController
 @RequestMapping("/tg-chat")
 public class ChatController {
-    private final InMemoryChatRepository chatRepository;
 
-    private static final String BAD_REQUEST_DESCRIPTION = "Некорректные параметры запроса";
-    private static final String BAD_REQUEST_CODE = "400";
-    private static final String BAD_REQUEST_EXCEPTION = "IllegalArgumentException";
-    private static final String BAD_REQUEST_MESSAGE = "Chat ID не должен быть null";
+    private final ChatService chatService;
 
-    private static final String NOT_FOUND_DESCRIPTION = "Ссылка не найдена";
-    private static final String NOT_FOUND_CODE = "404";
-    private static final String NOT_FOUND_EXCEPTION = "NotFoundException";
-    private static final String NOT_FOUND_MESSAGE = "Запрашиваемый ресурс не найден";
-
-    public ChatController(InMemoryChatRepository chatRepository) {
-        this.chatRepository = chatRepository;
-    }
-
+    @Operation(summary = "register chat")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "chat is registered",
+            content = @Content),
+        @ApiResponse(responseCode = "400", description = "invalid request parameters",
+            content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))),
+        @ApiResponse(responseCode = "409", description = "chat already exists",
+            content = @Content(schema = @Schema(implementation = ApiErrorResponse.class)))
+    })
     @PostMapping("/{id}")
-    public ResponseEntity<?> registerChat(@PathVariable("id") Long chatId) {
-        if (chatId == null) {
-            return ResponseEntity.badRequest().body(
-                createBadRequestError("Не указан идентификатор чата.", new ArrayList<>()));
-        }
-        chatRepository.registerChat(chatId);
-        return ResponseEntity.ok("Чат зарегистрирован");
+    public void registerChat(@PathVariable("id") @Positive Long chatId) {
+        chatService.registerChat(chatId);
     }
 
+    @Operation(summary = "delete chat")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "chat is deleted",
+            content = @Content),
+        @ApiResponse(responseCode = "400", description = "invalid request parameters",
+            content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))),
+        @ApiResponse(responseCode = "404", description = "chat not found",
+            content = @Content(schema = @Schema(implementation = ApiErrorResponse.class)))
+    })
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteChat(@PathVariable("id") Long chatId) {
-        if (chatId == null) {
-            return ResponseEntity.badRequest().body(
-                createBadRequestError(BAD_REQUEST_DESCRIPTION, new ArrayList<>()));
-        }
-        boolean removed = chatRepository.removeChat(chatId);
-        if (!removed) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(createNotFoundError(
-                NOT_FOUND_DESCRIPTION, new ArrayList<>()));
-        }
-        return ResponseEntity.ok("Чат успешно удалён");
+    public void deleteChat(@PathVariable("id") @Positive Long chatId) {
+        chatService.deleteChat(chatId);
     }
-
-    private ApiErrorResponse createBadRequestError(String description, List<String> stacktrace) {
-        return new ApiErrorResponse(description, BAD_REQUEST_CODE, BAD_REQUEST_EXCEPTION,
-            BAD_REQUEST_MESSAGE, stacktrace);
-    }
-
-    private ApiErrorResponse createNotFoundError(String description, List<String> stacktrace) {
-        return new ApiErrorResponse(description, NOT_FOUND_CODE, NOT_FOUND_EXCEPTION,
-            NOT_FOUND_MESSAGE, stacktrace);
-    }
-
 }

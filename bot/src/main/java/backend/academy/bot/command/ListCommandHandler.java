@@ -1,7 +1,7 @@
 package backend.academy.bot.command;
 
-import backend.academy.bot.ApiError;
-import backend.academy.bot.dto.ListLinksResponse;
+import backend.academy.bot.dto.scrapperAPI.response.ListLinksResponse;
+import backend.academy.bot.exception.ApiError;
 import backend.academy.bot.service.ScrapperClient;
 import backend.academy.bot.service.TelegramClient;
 import org.springframework.stereotype.Component;
@@ -43,7 +43,7 @@ public class ListCommandHandler implements CommandHandler {
     private void sendErrorInfo(Long chatId, Throwable error, String msg) {
         if (error instanceof ApiError apiError) {
             // Если ошибка является экземпляром ApiError, выводим описание
-            telegramClient.sendMessage(chatId, msg + ":\n " + apiError.getDescription());
+            telegramClient.sendMessage(chatId, msg + " :\n " + apiError.getDescription());
         } else {
             // В случае других ошибок выводим стандартное сообщение
             telegramClient.sendMessage(chatId, msg + ":\n " + error.getMessage());

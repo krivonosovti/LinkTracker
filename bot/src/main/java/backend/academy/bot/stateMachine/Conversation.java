@@ -1,4 +1,4 @@
-package backend.academy.bot.state;
+package backend.academy.bot.stateMachine;
 
 import java.util.List;
 

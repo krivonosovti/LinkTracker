@@ -1,6 +1,6 @@
 package backend.academy.bot.service;
 
-import backend.academy.bot.BotConfig;
+import backend.academy.bot.configuration.BotConfig;
 import java.util.HashMap;
 import java.util.Map;
 import net.logstash.logback.argument.StructuredArguments;

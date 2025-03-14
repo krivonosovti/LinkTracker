@@ -1,15 +1,14 @@
 package backend.academy.scrapper.service.storage;
 
 
-import backend.academy.scrapper.dto.response.LinkResponse;
-import backend.academy.scrapper.dto.response.ListLinksResponse;
+import backend.academy.scrapper.dto.bot.response.LinkResponse;
+import backend.academy.scrapper.dto.bot.response.ListLinksResponse;
 import backend.academy.scrapper.entity.Chat;
 import backend.academy.scrapper.entity.Link;
 import backend.academy.scrapper.enums.LinkStatus;
 import backend.academy.scrapper.exception.ApiExceptionType;
 import backend.academy.scrapper.repository.LinkRepository;
 import backend.academy.scrapper.util.LinkParser;
-import java.net.URI;
 import java.time.OffsetDateTime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -52,31 +51,31 @@ public class LinkService implements backend.academy.scrapper.service.LinkService
 
     @Transactional
     @Override
-    public LinkResponse addLinkToChat(Long chatId, URI url) {
+    public LinkResponse addLinkToChat(Long chatId, String url) {
         Link parsedLink = LinkParser.parseLink(url);
         Chat chat = chatService.findByChatId(chatId);
         Link link = processLinkForAdding(parsedLink, chat);
         chat.addLink(link);
         log.debug("add link{id={}} to chat{id={}}", link.id(), chat.id());
-        return new LinkResponse(link.id(), URI.create(link.url()));
+        return new LinkResponse(link.id(), link.url());
     }
 
     @Transactional
     @Override
-    public LinkResponse removeLinkFromChat(Long chatId, URI url) {
+    public LinkResponse removeLinkFromChat(Long chatId, String url) {
         Link parsedLink = LinkParser.parseLink(url);
         Chat chat = chatService.findByChatId(chatId);
         Link link = processLinkForDeletion(parsedLink, chat);
         chat.removeLink(link);
         log.debug("remove link{id={}} from chat{id={}}", link.id(), chat.id());
-        return new LinkResponse(link.id(), URI.create(link.url()));
+        return new LinkResponse(link.id(), link.url());
     }
 
     @Override
     public ListLinksResponse getChatLinks(Long chatId) {
         List<LinkResponse> trackedLinks = chatService.findByChatId(chatId)
             .links().stream()
-            .map(link -> new LinkResponse(link.id(), URI.create(link.url())))
+            .map(link -> new LinkResponse(link.id(), link.url()))
             .toList();
         return new ListLinksResponse(trackedLinks, trackedLinks.size());
     }

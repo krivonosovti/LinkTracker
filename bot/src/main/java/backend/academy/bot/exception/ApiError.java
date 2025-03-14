@@ -1,6 +1,5 @@
-package backend.academy.bot;
+package backend.academy.bot.exception;
 
-import java.io.Serializable;
 import java.util.List;
 
 public class ApiError extends RuntimeException {

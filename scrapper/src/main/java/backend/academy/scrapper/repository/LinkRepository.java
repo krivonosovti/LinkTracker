@@ -3,10 +3,10 @@ package backend.academy.scrapper.repository;
 import backend.academy.scrapper.entity.Chat;
 import backend.academy.scrapper.entity.Link;
 import backend.academy.scrapper.enums.LinkStatus;
-import org.springframework.data.domain.Pageable;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
+import org.springframework.data.domain.Pageable;
 
 public interface LinkRepository {
 

@@ -1,9 +1,9 @@
 package backend.academy.scrapper.controller;
 
-import backend.academy.scrapper.dto.request.AddLinkRequest;
-import backend.academy.scrapper.dto.request.RemoveLinkRequest;
-import backend.academy.scrapper.dto.response.LinkResponse;
-import backend.academy.scrapper.dto.response.ListLinksResponse;
+import backend.academy.scrapper.dto.bot.request.AddLinkRequest;
+import backend.academy.scrapper.dto.bot.request.RemoveLinkRequest;
+import backend.academy.scrapper.dto.bot.response.LinkResponse;
+import backend.academy.scrapper.dto.bot.response.ListLinksResponse;
 import backend.academy.scrapper.exception.ApiErrorResponse;
 import backend.academy.scrapper.service.LinkService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -16,6 +16,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -59,7 +60,7 @@ public class LinkController {
         @ApiResponse(responseCode = "409", description = "link already added",
             content = @Content(schema = @Schema(implementation = ApiErrorResponse.class)))
     })
-    @PostMapping
+    @PostMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     public LinkResponse addLink(
         @RequestHeader("Tg-Chat-Id") @NotNull @Positive Long chatId,
         @RequestBody @Valid AddLinkRequest linkRequest

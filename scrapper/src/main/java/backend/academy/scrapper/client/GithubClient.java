@@ -2,14 +2,14 @@ package backend.academy.scrapper.client;
 
 import backend.academy.scrapper.dto.github.CommitDto;
 import backend.academy.scrapper.dto.github.IssueDto;
+import java.time.OffsetDateTime;
+import java.util.List;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.service.annotation.GetExchange;
 import org.springframework.web.service.annotation.HttpExchange;
-import java.time.OffsetDateTime;
-import java.util.List;
 
 @HttpExchange(accept = MediaType.APPLICATION_JSON_VALUE)
 public interface GithubClient {

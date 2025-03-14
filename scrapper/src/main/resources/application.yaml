@@ -1,0 +1,87 @@
+app:
+  link-age: 120
+  link-update-batch-size: 50
+
+  link-updater-scheduler:
+    enable: true
+    interval: 10000
+    force-check-delay: 10000
+
+  github-client:
+    api: https://api.github.com
+    retry:
+      strategy: exponential
+      max-attempts: 3
+      backoff: 2000
+      max-backoff: 10000
+      codes: 503, 504
+
+  stackoverflow-client:
+    api: https://api.stackexchange.com/2.3
+    retry:
+      strategy: linear
+      max-attempts: 3
+      backoff: 2000
+      max-backoff: 10000
+      codes: 503, 504
+
+  bot-client:
+    api: http://localhost:8080
+    retry:
+      strategy: fixed
+      max-attempts: 3
+      backoff: 2000
+      codes: 429, 503, 504
+
+  link-sources:
+    github:
+      domain: github.com
+      handlers:
+        repository:
+          regex: /(?<owner>[\w-\.]+)/(?<repo>[\w-\.]+)
+          handler: backend.academy.scrapper.handler.github.Repository
+
+        branch:
+          regex: /(?<owner>[\w-\.]+)/(?<repo>[\w-\.]+)/tree/(?<branch>[\w-\./]+)
+          handler: backend.academy.scrapper.handler.github.RepositoryBranch
+        pull-request:
+          regex: /(?<owner>[\w-\.]+)/(?<repo>[\w-\.]+)/pull/(?<num>\d+)
+          handler: backend.academy.scrapper.handler.github.PullRequest
+        issue:
+          regex: /(?<owner>[\w-\.]+)/(?<repo>[\w-\.]+)/issues/(?<num>\d+)
+          handler: backend.academy.scrapper.handler.github.Issue
+    stackoverflow:
+      domain: stackoverflow.com
+      handlers:
+        question:
+          regex: /(?:questions|q)/(?<id>[\d]+)[/\w-\d]*
+          handler: backend.academy.scrapper.handler.stackoverflow.Question
+
+management:
+  health:
+    redis:
+      enabled: false
+
+spring:
+  messages:
+    basename: messages
+    encoding: UTF-8
+  application:
+    name: Scrapper
+  liquibase:
+    enabled: false
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+
+#logging:
+#  config: classpath:log4j2-plain.xml
+
+server:
+  port: 8081
+
+springdoc:
+  swagger-ui:
+    enabled: true
+    path: /swagger-ui

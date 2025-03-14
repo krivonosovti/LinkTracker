@@ -1,4 +1,4 @@
-package backend.academy.bot.dto;
+package backend.academy.bot.dto.telegramAPI;
 
 public class TelegramMessage {
     private Long massageID;

@@ -3,14 +3,13 @@ package backend.academy.scrapper.configuration;
 import backend.academy.scrapper.enums.LinkType;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
+import java.time.Duration;
+import java.util.List;
+import java.util.Map;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.bind.DefaultValue;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.validation.annotation.Validated;
-
-import java.time.Duration;
-import java.util.List;
-import java.util.Map;
 
 @Validated
 @ConfigurationProperties(prefix = "app", ignoreUnknownFields = false)
@@ -29,7 +28,7 @@ public record ScrapperConfig(
         BotClient botClient,
         Map<LinkType, LinkSource> linkSources
 ) {
-    public record LinkUpdaterScheduler(boolean enable, @NotNull Duration interval,@NotNull Duration forceCheckDelay) {
+    public record LinkUpdaterScheduler(boolean enable, @NotNull Duration interval, @NotNull Duration forceCheckDelay) {
     }
 
     public record LinkSource(@NotEmpty String domain, Map<String, LinkSourceHandler> handlers) {

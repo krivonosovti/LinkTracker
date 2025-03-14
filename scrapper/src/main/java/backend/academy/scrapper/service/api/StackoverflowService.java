@@ -6,12 +6,11 @@ import backend.academy.scrapper.dto.stackoverflow.QuestionAnswerDto;
 import backend.academy.scrapper.dto.stackoverflow.QuestionDto;
 import backend.academy.scrapper.entity.Link;
 import backend.academy.scrapper.enums.LinkStatus;
+import backend.academy.scrapper.service.LinkService;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-
-import backend.academy.scrapper.service.LinkService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;

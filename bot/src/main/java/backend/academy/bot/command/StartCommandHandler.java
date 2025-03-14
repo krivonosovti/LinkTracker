@@ -1,6 +1,6 @@
 package backend.academy.bot.command;
 
-import backend.academy.bot.ApiError;
+import backend.academy.bot.exception.ApiError;
 import backend.academy.bot.service.ScrapperClient;
 import backend.academy.bot.service.TelegramClient;
 import org.springframework.stereotype.Component;
@@ -9,6 +9,7 @@ import reactor.core.publisher.Mono;
 @Component
 public class StartCommandHandler implements CommandHandler {
 
+    public static final String REGISTRATION_ERROR = "Ошибка регистрации: ";
     private final ScrapperClient scrapperClient;
     private final TelegramClient telegramClient;
 
@@ -29,9 +30,9 @@ public class StartCommandHandler implements CommandHandler {
             .doOnSuccess(unused -> telegramClient.sendMessage(chatId, getWelcomeMessage()))
             .doOnError(error ->  {
                 if (error instanceof ApiError) {
-                    telegramClient.sendMessage(chatId, "Ошибка регистрации: " + ((ApiError) error).getDescription());
+                    telegramClient.sendMessage(chatId, REGISTRATION_ERROR + ((ApiError) error).getDescription());
                 } else {
-                    telegramClient.sendMessage(chatId, "Ошибка регистрации: " + error.getMessage());
+                    telegramClient.sendMessage(chatId, REGISTRATION_ERROR + error.getMessage());
                 }
             })
             .then();
@@ -58,7 +59,7 @@ public class StartCommandHandler implements CommandHandler {
             telegramClient.sendMessage(chatId, msg + ":\n " + apiError.getDescription());
         } else {
             // В случае других ошибок выводим стандартное сообщение
-            telegramClient.sendMessage(chatId, msg + ":\n " + error.getMessage());
+            telegramClient.sendMessage(chatId, msg + ": \n " + error.getMessage());
         }
     }
 }

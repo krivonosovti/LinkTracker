@@ -1,18 +1,15 @@
 package backend.academy.bot.contoller;
 
-import backend.academy.bot.dto.ApiErrorResponse;
-import backend.academy.bot.dto.LinkUpdate;
-import backend.academy.bot.state.StateMachine;
+import backend.academy.bot.dto.error.ApiErrorResponse;
+import backend.academy.bot.dto.scrapperAPI.request.LinkUpdate;
+import backend.academy.bot.stateMachine.StateMachine;
 import jakarta.validation.Valid;
 import java.util.ArrayList;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.MethodArgumentNotValidException;
-import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;

@@ -1,4 +1,4 @@
-package backend.academy.bot.dto;
+package backend.academy.bot.dto.telegramAPI;
 
 import java.util.List;
 

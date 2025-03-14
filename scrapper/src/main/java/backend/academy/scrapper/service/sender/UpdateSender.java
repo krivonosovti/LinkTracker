@@ -1,7 +1,7 @@
 package backend.academy.scrapper.service.sender;
 
 
-import backend.academy.scrapper.dto.response.LinkUpdate;
+import backend.academy.scrapper.dto.bot.response.LinkUpdate;
 
 public interface UpdateSender {
 

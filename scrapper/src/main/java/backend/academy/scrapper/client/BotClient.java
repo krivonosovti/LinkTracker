@@ -1,6 +1,6 @@
 package backend.academy.scrapper.client;
 
-import backend.academy.scrapper.dto.response.LinkUpdate;
+import backend.academy.scrapper.dto.bot.response.LinkUpdate;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.service.annotation.HttpExchange;

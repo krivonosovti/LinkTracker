@@ -1,13 +1,9 @@
 package backend.academy.scrapper.repository;
 
+import backend.academy.scrapper.entity.Chat;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
-import java.util.concurrent.ConcurrentSkipListSet;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import backend.academy.scrapper.entity.Chat;
 import org.springframework.stereotype.Repository;
 
 @Repository

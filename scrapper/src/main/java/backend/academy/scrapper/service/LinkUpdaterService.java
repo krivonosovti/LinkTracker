@@ -1,14 +1,13 @@
 package backend.academy.scrapper.service;
 
 import backend.academy.scrapper.configuration.ScrapperConfig;
-import backend.academy.scrapper.dto.response.LinkUpdate;
+import backend.academy.scrapper.dto.bot.response.LinkUpdate;
 import backend.academy.scrapper.entity.Chat;
 import backend.academy.scrapper.entity.Link;
 import backend.academy.scrapper.enums.LinkStatus;
 import backend.academy.scrapper.handler.LinkUpdateHandler;
 import backend.academy.scrapper.service.sender.UpdateSender;
 import backend.academy.scrapper.util.LinkSourceUtil;
-import java.net.URI;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Map;
@@ -75,7 +74,7 @@ public class LinkUpdaterService {
             handleClientExceptionOnLinkUpdate(ex, link);
         }
     }
-    // TUUUT
+
     private Optional<LinkUpdateHandler> getLinkUpdateHandler(Link link, ScrapperConfig.LinkSource linkSource) {
         return linkSource.handlers().values().stream()
                 .filter(it -> Pattern.matches("https://" + linkSource.domain() + it.regex(), link.url()))
@@ -87,7 +86,7 @@ public class LinkUpdaterService {
     private void notifyBot(Link link, String message, OffsetDateTime checkedAt) {
         LinkUpdate update = new LinkUpdate(
             link.id(),
-            URI.create(link.url()),
+            link.url(),
             message,
             link.chats().stream()
                 .map(Chat::chatId)
@@ -95,9 +94,9 @@ public class LinkUpdaterService {
         );
         log.debug(
             "send link update to the bot: id={}\nurl={}\nmessage={}",
-            update.id(),
-            update.url(),
-            update.description()
+            update.getId(),
+            update.getUrl(),
+            update.getDescription()
         );
         boolean isSent = updateSender.send(update);
         if (isSent) {

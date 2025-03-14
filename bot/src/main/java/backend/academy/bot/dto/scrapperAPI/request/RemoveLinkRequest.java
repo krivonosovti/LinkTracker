@@ -1,4 +1,4 @@
-package backend.academy.bot.dto;
+package backend.academy.bot.dto.scrapperAPI.request;
 
 public class RemoveLinkRequest {
     private String link;

@@ -1,11 +1,10 @@
 package backend.academy.scrapper.service.sender;
 
 import backend.academy.scrapper.client.BotClient;
-import backend.academy.scrapper.dto.response.LinkUpdate;
+import backend.academy.scrapper.dto.bot.response.LinkUpdate;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ArrayUtils;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 

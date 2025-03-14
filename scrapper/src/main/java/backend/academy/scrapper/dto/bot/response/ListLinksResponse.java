@@ -1,15 +1,14 @@
-package backend.academy.bot.dto;
+package backend.academy.scrapper.dto.bot.response;
 
 import java.util.List;
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 
+@AllArgsConstructor
+@NoArgsConstructor
 public class ListLinksResponse {
     private List<LinkResponse> links;
     private int size;
-
-    public ListLinksResponse(List<LinkResponse> links, int size) {
-        this.links = links;
-        this.size = size;
-    }
 
     public List<LinkResponse> getLinks() {
         return links;

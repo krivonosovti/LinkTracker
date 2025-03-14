@@ -1,9 +1,9 @@
 package backend.academy.bot.service;
 
-import backend.academy.bot.BotConfig;
-import backend.academy.bot.dto.TelegramResponse;
-import backend.academy.bot.dto.TelegramUpdate;
-import backend.academy.bot.state.StateMachine;
+import backend.academy.bot.configuration.BotConfig;
+import backend.academy.bot.dto.telegramAPI.TelegramResponse;
+import backend.academy.bot.dto.telegramAPI.TelegramUpdate;
+import backend.academy.bot.stateMachine.StateMachine;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;

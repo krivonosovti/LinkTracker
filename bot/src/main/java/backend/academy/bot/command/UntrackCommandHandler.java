@@ -1,7 +1,7 @@
 package backend.academy.bot.command;
 
-import backend.academy.bot.ApiError;
-import backend.academy.bot.dto.LinkResponse;
+import backend.academy.bot.dto.scrapperAPI.response.LinkResponse;
+import backend.academy.bot.exception.ApiError;
 import backend.academy.bot.service.ScrapperClient;
 import backend.academy.bot.service.TelegramClient;
 import org.springframework.stereotype.Component;
@@ -46,7 +46,7 @@ public class UntrackCommandHandler implements CommandHandler {
             telegramClient.sendMessage(chatId, msg + ":\n " + apiError.getDescription());
         } else {
             // В случае других ошибок выводим стандартное сообщение
-            telegramClient.sendMessage(chatId, msg + ":\n " + error.getMessage());
+            telegramClient.sendMessage(chatId, msg + ": \n " + error.getMessage());
         }
     }
 }

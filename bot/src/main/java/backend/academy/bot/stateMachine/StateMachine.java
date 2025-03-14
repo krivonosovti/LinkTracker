@@ -1,9 +1,9 @@
-package backend.academy.bot.state;
+package backend.academy.bot.stateMachine;
 
-import backend.academy.bot.ApiError;
 import backend.academy.bot.command.CommandHandler;
-import backend.academy.bot.dto.LinkResponse;
-import backend.academy.bot.dto.LinkUpdate;
+import backend.academy.bot.dto.scrapperAPI.request.LinkUpdate;
+import backend.academy.bot.dto.scrapperAPI.response.LinkResponse;
+import backend.academy.bot.exception.ApiError;
 import backend.academy.bot.service.ScrapperClient;
 import backend.academy.bot.service.TelegramClient;
 import java.util.Arrays;
@@ -21,6 +21,9 @@ import reactor.core.publisher.Mono;
 
 @Component
 public class StateMachine {
+    public static final String CHAT_ID = "chatId";
+    public static final String START = "/start";
+    public static final String SET_LINK_ERROR = "Ошибка при добавлении ссылки: ";
     // Хранение разговоров для каждого пользователя (chatId)
     private final Map<Long, Conversation> conversations = new ConcurrentHashMap<>();
     private final TelegramClient telegramClient;
@@ -36,6 +39,7 @@ public class StateMachine {
         }
     }
 
+    @SuppressWarnings("checkstyle:ReturnCount")
     public void start(Long chatId, String messageText) {
         Conversation conv = conversations.computeIfAbsent(chatId, id -> new Conversation());
         State state = conv.getState();
@@ -63,7 +67,7 @@ public class StateMachine {
             default:
                 telegramClient.sendMessage(chatId, "Неверное состояние. Введите /help для получения списка команд.");
                 conv.reset();
-                logger.error("Недопустимое состояние", StructuredArguments.keyValue("chatId", chatId));
+                logger.error("Недопустимое состояние", StructuredArguments.keyValue(CHAT_ID, chatId));
         }
     }
 
@@ -97,9 +101,9 @@ public class StateMachine {
     }
 
     private void startScript(Long chatId, String messageText, Conversation conv) {
-        if (messageText.trim().equalsIgnoreCase("/start")) {
+        if (messageText.trim().equalsIgnoreCase(START)) {
             conv.setState(State.COMMAND_WAITING);
-            commandHandlers.get("/start").handle(chatId, messageText);
+            commandHandlers.get(START).handle(chatId, messageText);
         } else {
             telegramClient.sendMessage(chatId, "Введите /start для начала работы с ботом.");
         }
@@ -121,7 +125,7 @@ public class StateMachine {
         } else {
             telegramClient.sendMessage(chatId, "Неизвестная команда. Введите /help для списка команд.");
             logger.info("Неизвестная команда: ", StructuredArguments.keyValue("message", messageText),
-                StructuredArguments.keyValue("chatId", chatId));
+                StructuredArguments.keyValue(CHAT_ID, chatId));
         }
     }
 
@@ -139,10 +143,10 @@ public class StateMachine {
         if (error instanceof ApiError) {
             // Если ошибка является экземпляром ApiError, выводим описание
             ApiError apiError = (ApiError) error;
-            telegramClient.sendMessage(chatId, "Ошибка при добавлении ссылки: " + apiError.getDescription());
+            telegramClient.sendMessage(chatId, SET_LINK_ERROR + apiError.getDescription());
         } else {
             // В случае других ошибок выводим стандартное сообщение
-            telegramClient.sendMessage(chatId, "Ошибка при добавлении ссылки: " + error.getMessage());
+            telegramClient.sendMessage(chatId, SET_LINK_ERROR + error.getMessage());
         }
     }
 
@@ -156,7 +160,8 @@ public class StateMachine {
         String notificationMessage = "Обновление по ссылке: " + update.getUrl() + "\n " + update.getDescription();
         conversations.get(chatId).reset(); //не понятно нужно ли
         telegramClient.sendMessage(chatId, "Уведомление:\n" + notificationMessage);
-        logger.info("Notify user: ", StructuredArguments.keyValue("chatId", chatId), StructuredArguments.keyValue("notificationMessage", notificationMessage));
+        logger.info("Notify user: ", StructuredArguments.keyValue(CHAT_ID, chatId),
+            StructuredArguments.keyValue("notificationMessage", notificationMessage));
     }
 }
 

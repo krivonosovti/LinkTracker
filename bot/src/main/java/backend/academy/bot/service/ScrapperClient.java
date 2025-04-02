@@ -23,7 +23,7 @@ public class ScrapperClient {
     public static final String LINKS = "/links";
     public static final String TG_CHAT_ID = "Tg-Chat-Id";
     public static final String TG_CHAT_ID_PARAM = "/tg-chat/{id}";
-    private final WebClient webClient; //faintClient
+    private final WebClient webClient;
 
     public ScrapperClient(WebClient.Builder webClientBuilder,
                           @Value("${app.scrapper-client.api:http://localhost:8081}") String baseUrl, Resource resource) {

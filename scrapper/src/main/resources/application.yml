@@ -1,12 +1,11 @@
 app:
+  database-access-type: jpa
   link-age: 120
   link-update-batch-size: 50
-
   link-updater-scheduler:
     enable: true
     interval: 10000
     force-check-delay: 10000
-
   github-client:
     api: https://api.github.com
     retry:
@@ -15,7 +14,6 @@ app:
       backoff: 2000
       max-backoff: 10000
       codes: 503, 504
-
   stackoverflow-client:
     api: https://api.stackexchange.com/2.3
     retry:
@@ -24,15 +22,13 @@ app:
       backoff: 2000
       max-backoff: 10000
       codes: 503, 504
-
   bot-client:
-    api: http://localhost:8080
+    api: http://localhost:8090
     retry:
       strategy: fixed
       max-attempts: 3
       backoff: 2000
       codes: 429, 503, 504
-
   link-sources:
     github:
       domain: github.com
@@ -49,7 +45,7 @@ app:
           handler: backend.academy.scrapper.handler.github.PullRequest
         issue:
           regex: /(?<owner>[\w-\.]+)/(?<repo>[\w-\.]+)/issues/(?<num>\d+)
-          handler: backend.academy.scrapper.handler.github.Issue
+          handler: backend.academy.scrapper.handler.github.Issue`
     stackoverflow:
       domain: stackoverflow.com
       handlers:
@@ -57,31 +53,71 @@ app:
           regex: /(?:questions|q)/(?<id>[\d]+)[/\w-\d]*
           handler: backend.academy.scrapper.handler.stackoverflow.Question
 
+#    link-update:
+#      name: link-update
+#      partitions: 1
+#      replicas: 3
+
+spring:
+  application:
+    name: scrapper
+  messages:
+    basename: messages
+    encoding: UTF-8
+  datasource:
+    url: jdbc:postgresql://localhost:5432/scrapper
+    username: postgres
+    password: postgres
+    driverClassName: org.postgresql.Driver
+  jpa:
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        show_sql: true
+        format_sql: false
+  liquibase:
+    enabled: false
+#logging:
+#  config: classpath:log4j2-plain.xml
+
+  cache:
+    cache-names:
+      - rate-limit-buckets
+    caffeine:
+      spec: maximumSize=100000,expireAfterAccess=3600s
+    jcache:
+      provider: com.github.benmanes.caffeine.jcache.spi.CaffeineCachingProvider
+
+server:
+  port: 8080
+
+springdoc:
+  api-docs:
+    enabled: true
+    path: /api-docs
+  swagger-ui:
+    enabled: true
+    path: /swagger-ui
+    disable-swagger-default-url: true
+    tags-sorter: alpha
+    operations-sorter: method
+  default-produces-media-type: application/json
+  default-consumes-media-type: application/json
+
+bucket4j:
+  enabled: true
+  filters:
+    - cache-name: rate-limit-buckets
+      url: (/tg-chat.*)|(/links.*)
+      http-response-body: "{\"description\":\"429 TOO_MANY_REQUESTS\",\"code\":\"RATE_LIMIT\",\"exceptionName\":\"ApiException\",\"exceptionMessage\":\"Too Many Requests\",\"stacktrace\":[]}"
+      rate-limits:
+        - cache-key: "getRemoteAddr()"
+          bandwidths:
+            - capacity: 2
+              time: 1
+              unit: seconds
+
 management:
   health:
     redis:
       enabled: false
-
-spring:
-  messages:
-    basename: messages
-    encoding: UTF-8
-  application:
-    name: Scrapper
-  liquibase:
-    enabled: false
-  jpa:
-    hibernate:
-      ddl-auto: validate
-    open-in-view: false
-
-#logging:
-#  config: classpath:log4j2-plain.xml
-
-server:
-  port: 8081
-
-springdoc:
-  swagger-ui:
-    enabled: true
-    path: /swagger-ui

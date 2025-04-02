@@ -16,6 +16,8 @@ import org.springframework.validation.annotation.Validated;
 @EnableScheduling
 public record ScrapperConfig(
         @NotNull
+        AccessType databaseAccessType,
+        @NotNull
         Integer linkAge,
         @NotNull
         Integer linkUpdateBatchSize,
@@ -48,6 +50,10 @@ public record ScrapperConfig(
     }
 
     public record BotClient(@NotNull String api, RetryConfig retry) {
+    }
+
+    public enum AccessType {
+        JDBC, JOOQ, JPA
     }
 
     public enum RetryStrategy {

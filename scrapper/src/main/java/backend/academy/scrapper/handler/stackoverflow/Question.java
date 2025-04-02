@@ -2,11 +2,11 @@ package backend.academy.scrapper.handler.stackoverflow;
 
 import backend.academy.scrapper.entity.Link;
 import backend.academy.scrapper.handler.LinkUpdateHandler;
-import backend.academy.scrapper.service.api.StackoverflowService;
 import java.util.Optional;
 import java.util.regex.MatchResult;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import backend.academy.scrapper.service.StackoverflowService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;

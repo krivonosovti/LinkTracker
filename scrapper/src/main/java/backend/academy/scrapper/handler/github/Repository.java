@@ -3,7 +3,7 @@ package backend.academy.scrapper.handler.github;
 import backend.academy.scrapper.dto.github.RepositoryDto;
 import backend.academy.scrapper.entity.Link;
 import backend.academy.scrapper.handler.LinkUpdateHandler;
-import backend.academy.scrapper.service.api.GithubService;
+import backend.academy.scrapper.service.GithubService;
 import java.util.Optional;
 import java.util.regex.MatchResult;
 import java.util.stream.Collectors;

@@ -32,7 +32,7 @@ public class TelegramPollingService {
             .uri(url)
             .retrieve()
             .bodyToMono(TelegramResponse.class)
-            .block(); // В планировщике можно использовать block() для упрощения
+            .block();
 
         if (response != null && response.isOk() && response.getResult() != null) {
             for (TelegramUpdate update : response.getResult()) {

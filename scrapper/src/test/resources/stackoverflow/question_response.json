@@ -1,0 +1,38 @@
+{
+    "items": [
+        {
+            "tags": [
+                "java",
+                "regex",
+                "utf-8",
+                "emoji"
+            ],
+            "owner": {
+                "account_id": 452117,
+                "reputation": 2114,
+                "user_id": 848377,
+                "user_type": "registered",
+                "accept_rate": 51,
+                "profile_image": "https://i.stack.imgur.com/855Jg.jpg?s=256&g=1",
+                "display_name": "vishalaksh",
+                "link": "https://stackoverflow.com/users/848377/vishalaksh"
+            },
+            "is_answered": true,
+            "view_count": 133881,
+            "protected_date": 1628061094,
+            "accepted_answer_id": 24841069,
+            "answer_count": 19,
+            "score": 73,
+            "last_activity_date": 1708417164,
+            "creation_date": 1405774773,
+            "last_edit_date": 1695386607,
+            "question_id": 24840667,
+            "content_license": "CC BY-SA 4.0",
+            "link": "https://stackoverflow.com/questions/24840667/what-is-the-regex-to-extract-all-the-emojis-from-a-string",
+            "title": "What is the regex to extract all the emojis from a string?"
+        }
+    ],
+    "has_more": false,
+    "quota_max": 300,
+    "quota_remaining": 291
+}
